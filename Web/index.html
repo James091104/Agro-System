@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Cultivos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Pantalla de Login */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard Principal */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            color: #333;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: #f8f9fa;
+            border-left-color: #667eea;
+        }
+
+        .menu-item.active {
+            background-color: #667eea;
+            color: white;
+            border-left-color: #764ba2;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            background: #f8f9fa;
+            overflow-y: auto;
+        }
+
+        /* Tablero de Control Agrícola */
+        .dashboard-header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .date-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .date-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-input label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .date-input input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Pronóstico del tiempo */
+        .weather-forecast {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .forecast-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .forecast-days {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .forecast-day {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .day-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .weather-icon {
+            font-size: 24px;
+        }
+
+        .temperature {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Ranking de Cultivos */
+        .ranking-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .ranking-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .ranking-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .ranking-table tbody tr:nth-child(1) { background: #ffebee; }
+        .ranking-table tbody tr:nth-child(2) { background: #e8f5e8; }
+        .ranking-table tbody tr:nth-child(3) { background: #fff3e0; }
+        .ranking-table tbody tr:nth-child(4) { background: #f3e5f5; }
+        .ranking-table tbody tr:nth-child(5) { background: #e1f5fe; }
+
+        /* Estado de Riego */
+        .irrigation-status {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .irrigation-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .irrigation-chart {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            position: relative;
+            background: conic-gradient(#4CAF50 0deg 180deg, #f0f0f0 180deg 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .irrigation-chart::before {
+            content: '';
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .irrigation-percentage {
+            position: relative;
+            z-index: 1;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .irrigation-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Dashboard Cards mejoradas */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .card .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Formulario de Cultivos */
+        .cultivo-form {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* Tabla de datos */
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .navbar {
+                padding: 10px 15px;
+            }
+            
+            .content-area {
+                padding: 15px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .date-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>🌱 AgroSystem</h1>
+                <p>Sistema de Gestión de Cultivos</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboard" class="dashboard">
+        <!-- Barra de navegación superior -->
+        <nav class="navbar">
+            <h2>🌱 AgroSystem - Panel de Control</h2>
+            <div class="user-info">
+                <span id="welcomeUser">Bienvenido, Usuario</span>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <!-- Menú lateral -->
+             
+            <aside class="sidebar">
+                <div class="menu-item active" onclick="showDashboard()">
+                    📊 Dashboard
+                </div>
+                <div class="menu-item" onclick="showCultivos()">
+                    🌾 Gestión de Cultivos
+                </div>
+                <div class="menu-item" onclick="showPrediccionMeteorologica()">
+                    🌤️ Predicción Meteorológica
+                </div>
+                <div class="menu-item" onclick="showMonitoreoSuelo()">
+                    🌱 Monitoreo de Suelo y Clima
+                </div>
+            </aside>
+
+            <!-- Área de contenido principal -->
+            <main class="content-area">
+                <!-- Vista Dashboard -->
+                <div id="dashboardView">
+                    <!-- Encabezado del tablero -->
+                    <div class="dashboard-header">
+                        <div class="dashboard-title">Tablero de Control Agrícola</div>
+                        <div class="date-controls">
+                            <div class="date-input">
+                                <label>Fecha de Inicio:</label>
+                                <input type="date" id="fechaInicio" value="2025-04-18">
+                            </div>
+                            <div class="date-input">
+                                <label>Fecha de Fin:</label>
+                                <input type="date" id="fechaFin" value="2025-04-25">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid principal del dashboard -->
+                    <div class="dashboard-grid">
+                        <!-- Pronóstico 3 días -->
+                        <div class="weather-forecast">
+                            <div class="forecast-title">Próximos 3 DÍAS</div>
+                            <div class="forecast-days">
+                                <div class="forecast-day">
+                                    <span class="day-name">Hoy</span>
+                                    <span class="weather-icon">☀️</span>
+                                    <span class="temperature">22°C</span>
+                                </div>
+                                <div class="forecast-day">
+                                    <span class="day-name">Mañana</span>
+                                    <span class="weather-icon">⛅</span>
+                                    <span class="temperature">20°C</span>
+                                </div>
+                                <div class="forecast-day">
+                                    <span class="day-name">Pasado Mañana</span>
+                                    <span class="weather-icon">🌧️</span>
+                                    <span class="temperature">17°C</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ranking de Cultivos -->
+                        <div class="ranking-section">
+                            <div class="ranking-title">Ranking de Cultivos por Rendimiento</div>
+                            <table class="ranking-table">
+                                <thead>
+                                    <tr>
+                                        <th>Puesto</th>
+                                        <th>Cultivo</th>
+                                        <th>Rendimiento (Kg/Ha)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Papa</td>
+                                        <td>19,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Maíz</td>
+                                        <td>5,600</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Cebada</td>
+                                        <td>3,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>Trigo</td>
+                                        <td>1,750</td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>Quinua</td>
+                                        <td>930</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Estado de Riego -->
+                        <div class="irrigation-status">
+                            <div class="irrigation-title">Estado de Riego</div>
+                            <div class="irrigation-chart">
+                                <div class="irrigation-percentage">50%</div>
+                            </div>
+                            <div class="irrigation-info">
+                                Parcela 1 - 50% activo<br>
+                                Próximo ciclo: 18:00
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cards de resumen -->
+                    <div class="dashboard-cards">
+                        <div class="card">
+                            <h3>Total Cultivos</h3>
+                            <div class="number" id="totalCultivos">0</div>
+                        </div>
+                        <div class="card">
+                            <h3>Cultivos Activos</h3>
+                            <div class="number" id="cultivosActivos">0</div>
+                        </div>
+                        <div class="card">
+                            <h3>Hectáreas Totales</h3>
+                            <div class="number" id="hectareasTotales">0</div>
+                        </div>
+                        <div class="card">
+                            <h3>Producción Estimada</h3>
+                            <div class="number" id="produccionEstimada">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista Gestión de Cultivos -->
+                <div id="cultivosView" style="display: none;">
+                    <h2>Gestión de Cultivos</h2>
+                    
+                    <button class="btn btn-primary" onclick="showFormularioCultivo()">
+                        ➕ Nuevo Cultivo
+                    </button>
+
+                    <!-- Formulario de Cultivo -->
+                    <div id="formularioCultivo" class="cultivo-form">
+                        <h3>Registro de Cultivo</h3>
+                        <form id="cultivoForm">
+                            <div class="form-row">
+                                <div>
+                                    <label>Nombre del Cultivo:</label>
+                                    <input type="text" class="form-control" name="nombre" required>
+                                </div>
+                                <div>
+                                    <label>Tipo:</label>
+                                    <select class="form-control" name="tipo" required>
+                                        <option value="">Seleccionar...</option>
+                                        <option value="Cereal">Cereal</option>
+                                        <option value="Legumbre">Legumbre</option>
+                                        <option value="Fruta">Fruta</option>
+                                        <option value="Verdura">Verdura</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div>
+                                    <label>Hectáreas:</label>
+                                    <input type="number" class="form-control" name="hectareas" step="0.1" required>
+                                </div>
+                                <div>
+                                    <label>Fecha de Siembra:</label>
+                                    <input type="date" class="form-control" name="fechaSiembra" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div>
+                                    <label>Estado:</label>
+                                    <select class="form-control" name="estado" required>
+                                        <option value="Planificado">Planificado</option>
+                                        <option value="Sembrado">Sembrado</option>
+                                        <option value="Crecimiento">Crecimiento</option>
+                                        <option value="Cosecha">Cosecha</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Producción Estimada (kg):</label>
+                                    <input type="number" class="form-control" name="produccionEstimada" required>
+                                </div>
+                            </div>
+                            <div style="margin-top: 20px;">
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideFormularioCultivo()">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tabla de Cultivos -->
+                    <div class="data-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Hectáreas</th>
+                                    <th>Fecha Siembra</th>
+                                    <th>Estado</th>
+                                    <th>Producción Est.</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaCultivos">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="prediccionMeteorologicaView" style="display: none;">
+                    <h2>🌤️ Predicción Meteorológica</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <!-- Pronóstico Extendido -->
+                        <div class="card" style="padding: 20px;">
+                            <h3>Pronóstico 7 Días</h3>
+                            <div id="pronosticoExtendido">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                    <div>
+                                        <strong>Lunes 28</strong><br>
+                                        <small>Despejado</small>
+                                    </div>
+                                    <div style="font-size: 24px;">☀️</div>
+                                    <div style="text-align: right;">
+                                        <strong>24°C</strong><br>
+                                        <small style="color: #666;">12°C</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                    <div>
+                                        <strong>Martes 29</strong><br>
+                                        <small>Parcialmente nublado</small>
+                                    </div>
+                                    <div style="font-size: 24px;">⛅</div>
+                                    <div style="text-align: right;">
+                                        <strong>22°C</strong><br>
+                                        <small style="color: #666;">10°C</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                    <div>
+                                        <strong>Miércoles 30</strong><br>
+                                        <small>Lluvia ligera</small>
+                                    </div>
+                                    <div style="font-size: 24px;">🌦️</div>
+                                    <div style="text-align: right;">
+                                        <strong>18°C</strong><br>
+                                        <small style="color: #666;">8°C</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                    <div>
+                                        <strong>Jueves 1</strong><br>
+                                        <small>Lluvia moderada</small>
+                                    </div>
+                                    <div style="font-size: 24px;">🌧️</div>
+                                    <div style="text-align: right;">
+                                        <strong>16°C</strong><br>
+                                        <small style="color: #666;">7°C</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                    <div>
+                                        <strong>Viernes 2</strong><br>
+                                        <small>Nublado</small>
+                                    </div>
+                                    <div style="font-size: 24px;">☁️</div>
+                                    <div style="text-align: right;">
+                                        <strong>19°C</strong><br>
+                                        <small style="color: #666;">9°C</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                    <div>
+                                        <strong>Sábado 3</strong><br>
+                                        <small>Despejado</small>
+                                    </div>
+                                    <div style="font-size: 24px;">☀️</div>
+                                    <div style="text-align: right;">
+                                        <strong>23°C</strong><br>
+                                        <small style="color: #666;">11°C</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                                    <div>
+                                        <strong>Domingo 4</strong><br>
+                                        <small>Parcialmente nublado</small>
+                                    </div>
+                                    <div style="font-size: 24px;">⛅</div>
+                                    <div style="text-align: right;">
+                                        <strong>21°C</strong><br>
+                                        <small style="color: #666;">10°C</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alertas Meteorológicas -->
+                        <div class="card" style="padding: 20px;">
+                            <h3>Alertas y Recomendaciones</h3>
+                            <div style="margin-bottom: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+                                <strong>⚠️ Alerta de Lluvia</strong><br>
+                                <small>Se esperan lluvias moderadas el jueves. Considere posponer actividades de campo.</small>
+                            </div>
+                            <div style="margin-bottom: 15px; padding: 15px; background: #d4edda; border-left: 4px solid #28a745; border-radius: 5px;">
+                                <strong>✅ Condiciones Óptimas</strong><br>
+                                <small>Lunes y martes ideales para siembra y aplicación de fertilizantes.</small>
+                            </div>
+                            <div style="margin-bottom: 15px; padding: 15px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 5px;">
+                                <strong>🌡️ Temperatura Baja</strong><br>
+                                <small>Temperaturas mínimas de 7°C esperadas. Proteja cultivos sensibles al frío.</small>
+                            </div>
+
+                            <h4 style="margin-top: 20px; margin-bottom: 10px;">Índices Agrícolas</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                    <strong>UV</strong><br>
+                                    <span style="color: #ff6b35; font-size: 20px;">Alto</span>
+                                </div>
+                                <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                    <strong>Humedad</strong><br>
+                                    <span style="color: #667eea; font-size: 20px;">65%</span>
+                                </div>
+                                <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                    <strong>Viento</strong><br>
+                                    <span style="color: #26d0ce; font-size: 20px;">12 km/h</span>
+                                </div>
+                                <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                    <strong>Presión</strong><br>
+                                    <span style="color: #a55eea; font-size: 20px;">1013 mb</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historial Meteorológico -->
+                    <div class="card" style="padding: 20px;">
+                        <h3>Historial Meteorológico (Últimos 30 días)</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <div style="font-size: 18px; color: #ff6b35; margin-bottom: 5px;">🌡️</div>
+                                <strong>Temp. Promedio</strong><br>
+                                <span style="font-size: 24px; color: #333;">18.5°C</span>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <div style="font-size: 18px; color: #667eea; margin-bottom: 5px;">💧</div>
+                                <strong>Precipitación</strong><br>
+                                <span style="font-size: 24px; color: #333;">45mm</span>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <div style="font-size: 18px; color: #26d0ce; margin-bottom: 5px;">💨</div>
+                                <strong>Viento Promedio</strong><br>
+                                <span style="font-size: 24px; color: #333;">8 km/h</span>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <div style="font-size: 18px; color: #a55eea; margin-bottom: 5px;">☀️</div>
+                                <strong>Días Soleados</strong><br>
+                                <span style="font-size: 24px; color: #333;">22 días</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista Monitoreo de Suelo y Clima -->
+                <div id="monitoreoSueloView" style="display: none;">
+                    <h2>🌱 Monitoreo de Suelo y Clima</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <!-- Sensores de Suelo -->
+                        <div class="card" style="padding: 20px;">
+                            <h3>Estado del Suelo - Tiempo Real</h3>
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span><strong>Humedad del Suelo</strong></span>
+                                    <span style="color: #28a745; font-weight: bold;">68%</span>
+                                </div>
+                                <div style="width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 68%; height: 100%; background: linear-gradient(90deg, #28a745, #20c997);"></div>
+                                </div>
+                                <small style="color: #666;">Nivel óptimo para la mayoría de cultivos</small>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span><strong>pH del Suelo</strong></span>
+                                    <span style="color: #17a2b8; font-weight: bold;">6.8</span>
+                                </div>
+                                <div style="width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 75%; height: 100%; background: linear-gradient(90deg, #17a2b8, #6f42c1);"></div>
+                                </div>
+                                <small style="color: #666;">Ligeramente ácido - Ideal para la mayoría de cultivos</small>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span><strong>Temperatura del Suelo</strong></span>
+                                    <span style="color: #fd7e14; font-weight: bold;">16°C</span>
+                                </div>
+                                <div style="width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 60%; height: 100%; background: linear-gradient(90deg, #fd7e14, #e83e8c);"></div>
+                                </div>
+                                <small style="color: #666;">Temperatura adecuada para germinación</small>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span><strong>Conductividad Eléctrica</strong></span>
+                                    <span style="color: #6f42c1; font-weight: bold;">1.2 dS/m</span>
+                                </div>
+                                <div style="width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 40%; height: 100%; background: linear-gradient(90deg, #6f42c1, #fd7e14);"></div>
+                                </div>
+                                <small style="color: #666;">Salinidad baja - Condiciones normales</small>
+                            </div>
+                        </div>
+
+                        <!-- Nutrientes del Suelo -->
+                        <div class="card" style="padding: 20px;">
+                            <h3>Análisis de Nutrientes</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                    <div style="font-size: 18px; color: #28a745; margin-bottom: 5px;">N</div>
+                                    <strong>Nitrógeno</strong><br>
+                                    <span style="font-size: 20px; color: #28a745;">Alto</span><br>
+                                    <small>45 ppm</small>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                    <div style="font-size: 18px; color: #ffc107; margin-bottom: 5px;">P</div>
+                                    <strong>Fósforo</strong><br>
+                                    <span style="font-size: 20px; color: #ffc107;">Medio</span><br>
+                                    <small>25 ppm</small>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                    <div style="font-size: 18px; color: #dc3545; margin-bottom: 5px;">K</div>
+                                    <strong>Potasio</strong><br>
+                                    <span style="font-size: 20px; color: #dc3545;">Bajo</span><br>
+                                    <small>120 ppm</small>
+                                </div>
+                            </div>
+
+                            <h4 style="margin-bottom: 10px;">Micronutrientes</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8f9fa; border-radius: 5px;">
+                                    <span>Hierro (Fe)</span>
+                                    <span style="color: #28a745;">✓ Adecuado</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8f9fa; border-radius: 5px;">
+                                    <span>Zinc (Zn)</span>
+                                    <span style="color: #ffc107;">⚠ Medio</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8f9fa; border-radius: 5px;">
+                                    <span>Manganeso (Mn)</span>
+                                    <span style="color: #28a745;">✓ Adecuado</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8f9fa; border-radius: 5px;">
+                                    <span>Boro (B)</span>
+                                    <span style="color: #dc3545;">⚠ Bajo</span>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 20px; padding: 15px; background: #d1ecf1; border-left: 4px solid #17a2b8; border-radius: 5px;">
+                                <strong>💡 Recomendación:</strong><br>
+                                <small>Se recomienda aplicar fertilizante rico en potasio y boro para optimizar la producción.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estaciones Meteorológicas -->
+                    <div class="card" style="padding: 20px; margin-bottom: 20px;">
+                        <h3>Red de Estaciones Meteorológicas</h3>
+                        <div class="data-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Estación</th>
+                                        <th>Ubicación</th>
+                                        <th>Temperatura</th>
+                                        <th>Humedad</th>
+                                        <th>Viento</th>
+                                        <th>Precipitación</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>EST-001</td>
+                                        <td>Parcela Norte</td>
+                                        <td>18.5°C</td>
+                                        <td>72%</td>
+                                        <td>8 km/h N</td>
+                                        <td>0 mm</td>
+                                        <td><span style="color: #28a745;">🟢 Activa</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>EST-002</td>
+                                        <td>Parcela Central</td>
+                                        <td>19.2°C</td>
+                                        <td>68%</td>
+                                        <td>12 km/h NE</td>
+                                        <td>0 mm</td>
+                                        <td><span style="color: #28a745;">🟢 Activa</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>EST-003</td>
+                                        <td>Parcela Sur</td>
+                                        <td>17.8°C</td>
+                                        <td>75%</td>
+                                        <td>6 km/h NO</td>
+                                        <td>0 mm</td>
+                                        <td><span style="color: #ffc107;">🟡 Mantenimiento</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>EST-004</td>
+                                        <td>Invernadero 1</td>
+                                        <td>22.1°C</td>
+                                        <td>80%</td>
+                                        <td>2 km/h</td>
+                                        <td>-</td>
+                                        <td><span style="color: #28a745;">🟢 Activa</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Historial de Sensores -->
+                    <div class="card" style="padding: 20px;">
+                        <h3>Tendencias de los Últimos 7 Días</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>Humedad Promedio</strong><br>
+                                <span style="font-size: 24px; color: #17a2b8;">69%</span><br>
+                                <small style="color: #28a745;">↗ +3% vs semana anterior</small>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>pH Promedio</strong><br>
+                                <span style="font-size: 24px; color: #6f42c1;">6.7</span><br>
+                                <small style="color: #6c757d;">→ Estable</small>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>Temp. Suelo</strong><br>
+                                <span style="font-size: 24px; color: #fd7e14;">16.2°C</span><br>
+                                <small style="color: #dc3545;">↘ -1.5°C vs semana anterior</small>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>Conductividad</strong><br>
+                                <span style="font-size: 24px; color: #e83e8c;">1.15 dS/m</span><br>
+                                <small style="color: #28a745;">↗ Mejorando</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Simulación de conexión a base de datos
+        class ConexionSQL {
+            constructor() {
+                this.connected = false;
+            }
+
+            conectar() {
+                console.log('Conectando a SQL Server...');
+                this.connected = true;
+                return this.connected;
+            }
+
+            ejecutarQuery(query, params = []) {
+                if (!this.connected) {
+                    throw new Error('No hay conexión a la base de datos');
+                }
+                
+                console.log('Ejecutando query:', query, params);
+                
+                if (query.includes('SELECT * FROM cultivos')) {
+                    return this.getCultivosDummy();
+                }
+                
+                return { success: true, affectedRows: 1 };
+            }
+
+            getCultivosDummy() {
+                return [
+                    {
+                        id: 1,
+                        nombre: 'Maíz Amarillo',
+                        tipo: 'Cereal',
+                        hectareas: 5.5,
+                        fechaSiembra: '2024-03-15',
+                        estado: 'Crecimiento',
+                        produccionEstimada: 5600
+                    },
+                    {
+                        id: 2,
+                        nombre: 'Papa Blanca',
+                        tipo: 'Verdura',
+                        hectareas: 3.2,
+                        fechaSiembra: '2024-02-20',
+                        estado: 'Cosecha',
+                        produccionEstimada: 19000
+                    },
+                    {
+                        id: 1,
+                        nombre: 'Cebada',
+                        tipo: 'Cereal',
+                        hectareas: 5.5,
+                        fechaSiembra: '2024-07-18',
+                        estado: 'Cosecha',
+                        produccionEstimada: 3000
+                    },
+                    {
+                        id: 1,
+                        nombre: 'Trigo',
+                        tipo: 'Cereal',
+                        hectareas: 2.5,
+                        fechaSiembra: '2024-11-04',
+                        estado: 'Planificado',
+                        produccionEstimada: 1750
+                    },
+                    {
+                        id: 1,
+                        nombre: 'Quinua',
+                        tipo: 'Cereal',
+                        hectareas: 3.0,
+                        fechaSiembra: '2024-12-11',
+                        estado: 'Sembrado',
+                        produccionEstimada: 950
+                    }
+                ];
+            }
+        }
+
+        // Modelo Cultivo
+        class Cultivo {
+            constructor(id, nombre, tipo, hectareas, fechaSiembra, estado, produccionEstimada) {
+                this.id = id;
+                this.nombre = nombre;
+                this.tipo = tipo;
+                this.hectareas = hectareas;
+                this.fechaSiembra = fechaSiembra;
+                this.estado = estado;
+                this.produccionEstimada = produccionEstimada;
+            }
+
+            static async obtenerTodos() {
+                const conexion = new ConexionSQL();
+                conexion.conectar();
+                return conexion.ejecutarQuery('SELECT * FROM cultivos');
+            }
+
+            static async crear(datos) {
+                const conexion = new ConexionSQL();
+                conexion.conectar();
+                const query = `INSERT INTO cultivos (nombre, tipo, hectareas, fechaSiembra, estado, produccionEstimada) 
+                              VALUES (?, ?, ?, ?, ?, ?)`;
+                return conexion.ejecutarQuery(query, [
+                    datos.nombre, datos.tipo, datos.hectareas, 
+                    datos.fechaSiembra, datos.estado, datos.produccionEstimada
+                ]);
+            }
+        }
+
+        // Controlador de Cultivos
+        class CultivoControlador {
+    constructor() {
+        this.cultivos = [];
+        this.nextId = 3;
+        this.editandoId = null; // Nueva propiedad para controlar la edición
+    }
+
+    async cargarCultivos() {
+        try {
+            this.cultivos = await Cultivo.obtenerTodos();
+            this.actualizarVista();
+            this.actualizarDashboard();
+        } catch (error) {
+            console.error('Error al cargar cultivos:', error);
+            alert('Error al conectar con la base de datos');
+        }
+    }
+
+    async agregarCultivo(formData) {
+        try {
+            const datos = {
+                nombre: formData.get('nombre'),
+                tipo: formData.get('tipo'),
+                hectareas: parseFloat(formData.get('hectareas')),
+                fechaSiembra: formData.get('fechaSiembra'),
+                estado: formData.get('estado'),
+                produccionEstimada: parseInt(formData.get('produccionEstimada'))
+            };
+
+            if (this.editandoId) {
+                // Modo edición
+                const index = this.cultivos.findIndex(c => c.id === this.editandoId);
+                if (index !== -1) {
+                    datos.id = this.editandoId;
+                    this.cultivos[index] = datos;
+                    alert('Cultivo actualizado exitosamente');
+                }
+                this.editandoId = null;
+            } else {
+                // Modo agregar
+                await Cultivo.crear(datos);
+                datos.id = this.nextId++;
+                this.cultivos.push(datos);
+                alert('Cultivo agregado exitosamente');
+            }
+            
+            this.actualizarVista();
+            this.actualizarDashboard();
+            hideFormularioCultivo();
+            
+        } catch (error) {
+            console.error('Error al procesar cultivo:', error);
+            alert('Error al guardar el cultivo');
+        }
+    }
+
+    // NUEVA FUNCIÓN: editarCultivo
+    editarCultivo(id) {
+        const cultivo = this.cultivos.find(c => c.id === id);
+        if (!cultivo) {
+            alert('Cultivo no encontrado');
+            return;
+        }
+
+        // Llenar el formulario con los datos del cultivo
+        const form = document.getElementById('cultivoForm');
+        form.elements['nombre'].value = cultivo.nombre;
+        form.elements['tipo'].value = cultivo.tipo;
+        form.elements['hectareas'].value = cultivo.hectareas;
+        form.elements['fechaSiembra'].value = cultivo.fechaSiembra;
+        form.elements['estado'].value = cultivo.estado;
+        form.elements['produccionEstimada'].value = cultivo.produccionEstimada;
+
+        // Cambiar el título del formulario
+        document.querySelector('#formularioCultivo h3').textContent = 'Editar Cultivo';
+        
+        // Cambiar el texto del botón
+        document.querySelector('#cultivoForm button[type="submit"]').textContent = 'Actualizar';
+
+        // Marcar que estamos editando
+        this.editandoId = id;
+
+        // Mostrar el formulario
+        showFormularioCultivo();
+    }
+
+    actualizarVista() {
+        const tbody = document.getElementById('tablaCultivos');
+        tbody.innerHTML = '';
+
+        this.cultivos.forEach(cultivo => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${cultivo.id}</td>
+                <td>${cultivo.nombre}</td>
+                <td>${cultivo.tipo}</td>
+                <td>${cultivo.hectareas}</td>
+                <td>${cultivo.fechaSiembra}</td>
+                <td>${cultivo.estado}</td>
+                <td>${cultivo.produccionEstimada} kg</td>
+                <td>
+                    <button class="btn btn-secondary" onclick="cultivoControlador.editarCultivo(${cultivo.id})">Editar</button>
+                    <button class="btn btn-primary" onclick="eliminarCultivo(${cultivo.id})">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    actualizarDashboard() {
+        document.getElementById('totalCultivos').textContent = this.cultivos.length;
+        document.getElementById('cultivosActivos').textContent = 
+            this.cultivos.filter(c => c.estado !== 'Cosecha').length;
+        document.getElementById('hectareasTotales').textContent = 
+            this.cultivos.reduce((sum, c) => sum + c.hectareas, 0).toFixed(1);
+        document.getElementById('produccionEstimada').textContent = 
+            this.cultivos.reduce((sum, c) => sum + c.produccionEstimada, 0) + ' kg';
+    }
+}
+
+// 2. MODIFICAR LA FUNCIÓN hideFormularioCultivo (buscar "function hideFormularioCultivo()")
+
+function hideFormularioCultivo() {
+    document.getElementById('formularioCultivo').style.display = 'none';
+    document.getElementById('cultivoForm').reset();
+    
+    // Resetear el estado de edición
+    cultivoControlador.editandoId = null;
+    document.querySelector('#formularioCultivo h3').textContent = 'Registro de Cultivo';
+    document.querySelector('#cultivoForm button[type="submit"]').textContent = 'Guardar';
+}
+
+        // Instancia global del controlador
+        const cultivoControlador = new CultivoControlador();
+
+        // Sistema de autenticación
+        function login(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simulamos autenticación (en producción esto sería contra la base de datos)
+            if (username === 'admin' && password === '123456') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('welcomeUser').textContent = `Bienvenido, ${username}`;
+                
+                // Cargar datos iniciales
+                cultivoControlador.cargarCultivos();
+            } else {
+                alert('Usuario o contraseña incorrectos');
+            }
+        }
+
+        function logout() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginForm').reset();
+        }
+
+        // Navegación del menú
+        function showDashboard() {
+            hideAllViews();
+            document.getElementById('dashboardView').style.display = 'block';
+            setActiveMenu(0);
+        }
+
+        function showCultivos() {
+            hideAllViews();
+            document.getElementById('cultivosView').style.display = 'block';
+            setActiveMenu(1);
+        }
+
+        function showPrediccionMeteorologica() {
+            hideAllViews();
+            document.getElementById('prediccionMeteorologicaView').style.display = 'block';
+            setActiveMenu(2);
+        }
+
+// Función para mostrar Monitoreo de Suelo
+        function showMonitoreoSuelo() {
+            hideAllViews();
+            document.getElementById('monitoreoSueloView').style.display = 'block';
+            setActiveMenu(3);
+        }
+
+                function hideAllViews() {
+                    document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('cultivosView').style.display = 'none';
+            document.getElementById('prediccionMeteorologicaView').style.display = 'none';
+            document.getElementById('monitoreoSueloView').style.display = 'none';
+        }
+
+        function setActiveMenu(index) {
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Gestión de formularios
+        function showFormularioCultivo() {
+            document.getElementById('formularioCultivo').style.display = 'block';
+        }
+
+        function hideFormularioCultivo() {
+            document.getElementById('formularioCultivo').style.display = 'none';
+            document.getElementById('cultivoForm').reset();
+        }
+
+        function editarCultivo(id) {
+            alert(`Función de edición para cultivo ID: ${id} - En desarrollo`);
+        }
+
+        function eliminarCultivo(id) {
+            if (confirm('¿Está seguro de eliminar este cultivo?')) {
+                cultivoControlador.cultivos = cultivoControlador.cultivos.filter(c => c.id !== id);
+                cultivoControlador.actualizarVista();
+                cultivoControlador.actualizarDashboard();
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loginForm').addEventListener('submit', login);
+            
+            document.getElementById('cultivoForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                cultivoControlador.agregarCultivo(formData);
+            });
+        });
+    </script>
+</body>
+</html>
